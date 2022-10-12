@@ -6,6 +6,7 @@ import About from "../pages/About";
 import Investitor from "../pages/Investitor";
 import Error from "../pages/Error";
 import { AnimatePresence } from "framer-motion";
+import Fix from "../pages/Fix";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -17,6 +18,7 @@ function AnimatedRoutes() {
         <Route path="/marketing" element={<Marketing />} />
         <Route path="/investitor" element={<Investitor />} />
         <Route path="/about" element={<About />} />
+        <Route path="/fix" element={<Fix />} />
         <Route path="*" element={<Error />} />
       </Routes>
     </AnimatePresence>
