@@ -1,16 +1,15 @@
 import ThreeGlobe from "three-globe";
-import { WebGLRenderer, Scene } from "three";
+import { WebGLRenderer, Scene, BoxGeometry, Mesh, Raycaster, Vector3, Group, BoxHelper, Box3Helper, Box3, BufferGeometry } from "three";
+import * as THREE from 'three'
 import {
   PerspectiveCamera,
   AmbientLight,
   DirectionalLight,
   Color,
   Fog,
-  // AxesHelper,
-  // DirectionalLightHelper,
-  // CameraHelper,
   PointLight,
-  SphereGeometry,
+  Vector2,
+  MeshBasicMaterial
 } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 // import { createGlowMesh } from "three-glow-mesh";
@@ -18,14 +17,32 @@ import countries from "./files/globe-data-min.json";
 import travelHistory from "./files/my-flights.json";
 import airportHistory from "./files/my-airports.json";
 import { useEffect, useRef } from "react";
-var renderer, camera, scene, controls;
-let mouseX = 0;
-let mouseY = 0;
-let windowHalfX = window.innerWidth / 2;
-let windowHalfY = window.innerHeight / 2;
-var Globe;
+import { Flow } from 'three/addons/modifiers/CurveModifier.js';
+import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+
 const GlobeCanvas = () => {
   const canvasContainer = useRef()
+
+  const ACTION_SELECT = 1, ACTION_NONE = 0;
+  let renderer, camera, scene, controls, rayCaster, flow, flow2, flow3, flow4, action = ACTION_NONE;
+  // let mouseX = 0;
+  // let mouseY = 0;
+  let windowHalfX = window.innerWidth / 2;
+  let windowHalfY = window.innerHeight / 2;
+  let Globe;
+  const curveHandles = [];
+  let mouse;
+
+  const gData = ["Book a call!", "3D Models", "3D video", "3D website"].map((el) => ({
+    lat: (Math.random() - 0.5) * 180,
+    lng: (Math.random() - 0.5) * 360,
+    size: 5,
+    color: ['red', 'white', 'blue', 'green'][Math.round(Math.random() * 3)],
+    text: el
+  }));
+
+
   // SECTION Initializing core ThreeJS elements
   function init() {
     // Initialize renderer
@@ -34,6 +51,10 @@ const GlobeCanvas = () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
     // renderer.outputEncoding = THREE.sRGBEncoding;
     canvasContainer.current.appendChild(renderer.domElement);
+
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener( 'pointerdown', onPointerDown );
+    
 
     // Initialize scene, light
     scene = new Scene();
@@ -88,8 +109,11 @@ const GlobeCanvas = () => {
     controls.minPolarAngle = Math.PI / 3.5;
     controls.maxPolarAngle = Math.PI - Math.PI / 3;
 
+    rayCaster = new Raycaster()
+    // rayCaster.params.Points.threshold = 1
+    mouse = new Vector2()
+
     window.addEventListener("resize", onWindowResize, false);
-    document.addEventListener("mousemove", onMouseMove);
   }
 
   // SECTION Globe
@@ -99,7 +123,8 @@ const GlobeCanvas = () => {
       waitForGlobeReady: true,
       animateIn: true,
     })
-      .hexPolygonsData(countries.features)
+      .globeImageUrl('/images/earth-night.jpg')
+      .bumpImageUrl('/images/earth-night.jpg')
       .hexPolygonResolution(3)
       .hexPolygonMargin(0.7)
       .showAtmosphere(true)
@@ -113,7 +138,8 @@ const GlobeCanvas = () => {
         ) {
           return "rgba(255,255,255, 1)";
         } else return "rgba(255,255,255, 0.7)";
-      });
+      })
+      ;
 
     // NOTE Arc animations are followed after the globe enters the scene
     setTimeout(() => {
@@ -163,10 +189,149 @@ const GlobeCanvas = () => {
     scene.add(Globe);
   }
 
+
+  function cpBox(obj){
+    const box = new Box3()
+    const positions = obj.geometry.getAttribute('position').array
+    for (let i = 0; i < positions.length; i+=3) {
+      box.expandByPoint(new Vector3(positions[i], positions[i+1], positions[i+2]))
+    }
+    return box
+  }
+
+
+  function createFlowObject(text, points, font, fontSize, moveCurve, textCoverInfo){
+    const curve = new THREE.CatmullRomCurve3(points);
+    curve.curveType = 'centripetal';
+    curve.closed = true;
+
+    const geometry1 = new TextGeometry( text, {
+      font: font,
+      size: fontSize,
+      height: 1,
+      curveSegments: 12,
+      bevelEnabled: true,
+      bevelThickness: 0.02,
+      bevelSize: 0.01,
+      bevelOffset: 0,
+      bevelSegments: 5,
+    } );
+
+    geometry1.rotateX( Math.PI );
+    geometry1.rotateY( Math.PI );
+
+    const material = new THREE.MeshStandardMaterial( {
+      color: 0x00ff00
+    } );
+
+    const objectToCurve = new THREE.Mesh( geometry1, material );
+
+    flow = new Flow( objectToCurve );
+    flow.updateCurve( 0, curve );
+    flow.moveAlongCurve( moveCurve );
+    flow.object3D.userData = {text: '3D models', isText: true}
+
+    const obj = flow.object3D
+    scene.add(obj)
+
+    if(textCoverInfo){
+      const box = cpBox(obj)
+      const coverGeometry = new BoxGeometry(box.max.x - box.min.x, box.max.y - box.min.y, box.max.z - box.min.z)
+      const mesh = new Mesh(coverGeometry, new MeshBasicMaterial({color: 0x00ff00}))
+      mesh.position.set(textCoverInfo.position.x, textCoverInfo.position.y, textCoverInfo.position.z)
+      mesh.rotation.set(textCoverInfo.rotation.x, textCoverInfo.rotation.y, textCoverInfo.rotation.z)
+      mesh.userData = {type: 'TextCover', text: text}
+      mesh.visible = false
+      scene.add(mesh)
+    }
+    
+
+    return obj
+  }
+
+  const initTexts = () => {
+    const dis1 = 75
+    const y1 = -30
+    const initialPoints = [
+      { x: 0, y: y1, z: -dis1 * Math.sqrt(2) },
+      { x: dis1, y: y1, z: - dis1 },
+      { x: dis1 * Math.sqrt(2), y: y1, z: 0 },
+      { x: dis1, y: y1, z: dis1 },
+      { x: 0, y: y1, z: dis1 * Math.sqrt(2) },
+      { x: - dis1, y: y1, z: dis1 },
+      { x: -dis1 * Math.sqrt(2), y: y1, z: 0 },
+      { x: - dis1, y: y1, z: - dis1 },
+    ];
+
+    const dis2 = 75
+    const y2 = 30
+    const initialPoints2 = [
+      { x: 0, y: y2, z: -dis2 * Math.sqrt(2) },
+      { x: dis2, y: y2, z: - dis2 },
+      { x: dis2 * Math.sqrt(2), y: y2, z: 0 },
+      { x: dis2, y: y2, z: dis2 },
+      { x: 0, y: y2, z: dis2 * Math.sqrt(2) },
+      { x: - dis2, y: y2, z: dis2 },
+      { x: -dis2 * Math.sqrt(2), y: y2, z: 0 },
+      { x: - dis2, y: y2, z: - dis2 },
+    ];
+
+    const dis3 = 80
+    const y3 = 0
+    const initialPoints3 = [
+      { x: 0, y: y3, z: -dis3 * Math.sqrt(2) },
+      { x: dis3, y: y3, z: - dis3 },
+      { x: dis3 * Math.sqrt(2), y: y3, z: 0 },
+      { x: dis3, y: y3, z: dis3 },
+      { x: 0, y: y3, z: dis3 * Math.sqrt(2) },
+      { x: - dis3, y: y3, z: dis3 },
+      { x: -dis3 * Math.sqrt(2), y: y3, z: 0 },
+      { x: - dis3, y: y3, z: - dis3 },
+    ];
+
+    const loader = new FontLoader();
+    loader.load( '/font/helvetiker_regular.typeface.json', function ( font ) {
+      createFlowObject('3D models', initialPoints.map(p => new Vector3(p.x, p.y, p.z)), font, 15, 0, {
+        position: new Vector3(85, -22, - 50),
+        rotation: new Vector3(0, Math.PI / 2 + Math.PI / 6, 0)
+      })
+      createFlowObject('Book a call!', initialPoints2.map(p => new Vector3(p.x, p.y, p.z)), font, 15, 0.04, {
+        position: new Vector3(95, 38, - 28),
+        rotation: new Vector3(0, Math.PI / 2 + Math.PI / 9, 0)
+      })
+      createFlowObject('3D website', initialPoints2.map(p => new Vector3(p.x, p.y, p.z)), font, 15, 0.5,{
+        position: new Vector3(-85, 38, 55),
+        rotation: new Vector3(0, Math.PI / 2 + Math.PI / 6, 0)
+      })
+      createFlowObject('3D video', initialPoints3.map(p => new Vector3(p.x, p.y, p.z)), font, 15, 0.75,{
+        position: new Vector3(-55, 8, -93),
+        rotation: new Vector3(0, Math.PI / 6, 0)
+      })
+    } );
+  }
+
   function onMouseMove(event) {
-    mouseX = event.clientX - windowHalfX;
-    mouseY = event.clientY - windowHalfY;
-    // console.log("x: " + mouseX + " y: " + mouseY);
+
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+  }
+
+  function onPointerDown( event ) {
+
+    action = ACTION_SELECT;
+    mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+    mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    rayCaster.setFromCamera( mouse, camera );
+
+    const items = scene.children.filter(el => el.userData?.type === 'TextCover')
+    const intersects = rayCaster.intersectObjects( items, true );
+    if(intersects.length > 0){
+      const object = intersects[0].object;
+      const objectText = object.userData?.text
+      if(objectText){
+        alert(`Click on ${objectText}`)
+      }
+    }
   }
 
   function onWindowResize() {
@@ -178,13 +343,16 @@ const GlobeCanvas = () => {
   }
 
   function animate() {
-    camera.position.x +=
-      Math.abs(mouseX) <= windowHalfX / 2
-        ? (mouseX / 2 - camera.position.x) * 0.005
-        : 0;
-    camera.position.y += (-mouseY / 2 - camera.position.y) * 0.005;
-    camera.lookAt(scene.position);
-    controls.update();
+    // camera.position.x +=
+    //   Math.abs(mouseX) <= windowHalfX / 2
+    //     ? (mouseX / 2 - camera.position.x) * 0.005
+    //     : 0;
+    // camera.position.y += (-mouseY / 2 - camera.position.y) * 0.005;
+    // camera.lookAt(scene.position);
+    // controls.update();
+    // if ( flow ) {
+    //   flow.moveAlongCurve( 0.001 );
+    // }
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
   }
@@ -193,10 +361,11 @@ const GlobeCanvas = () => {
       if(!scene){
         init();
         initGlobe();
+        initTexts()
         onWindowResize();
         animate();
       }
-    })
+    }, [])
     return (
         <div ref={canvasContainer}></div>
     )
