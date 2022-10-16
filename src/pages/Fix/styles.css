@@ -5,10 +5,43 @@
     min-width: 100%;
     min-height: 100%;
     background: #000;
+    z-index: 2;
+}
+.video-full{
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    object-fit: cover;
+}
+.image-full{
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
 }
 
 canvas {
     display: block;
     width: 100%;
     height: 100%;
+}
+#section3DWebsite, #section3DVideo, #section3DModels, #sectionBookACall{
+    width: 100vw;
+    height: 100vh;
+}
+
+.scroll-to-top-button{
+    position: fixed; 
+    width: fit-content;
+    height: 50px;
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    z-index: 5;
+    text-transform: uppercase;
+    font-size: 18px;
+    font-weight: 600;
+    transform: rotate(-90deg);
+    left: -60px;
+    bottom: 50%;
+    color: rgb(231, 231, 62);
 }

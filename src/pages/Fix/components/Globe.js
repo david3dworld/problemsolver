@@ -1,5 +1,5 @@
 import ThreeGlobe from "three-globe";
-import { WebGLRenderer, Scene, BoxGeometry, Mesh, Raycaster, Vector3, Group, BoxHelper, Box3Helper, Box3, BufferGeometry } from "three";
+import { WebGLRenderer, Scene, BoxGeometry, Mesh, Raycaster, Vector3, Group, BoxHelper, Box3Helper, Box3, BufferGeometry, Texture } from "three";
 import * as THREE from 'three'
 import {
   PerspectiveCamera,
@@ -20,6 +20,7 @@ import { useEffect, useRef } from "react";
 import { Flow } from 'three/addons/modifiers/CurveModifier.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
+import backgroundImg from "../../../assets/images/CanvasBackground.png"
 
 const GlobeCanvas = () => {
   const canvasContainer = useRef()
@@ -343,18 +344,28 @@ const GlobeCanvas = () => {
   }
 
   function animate() {
-    // camera.position.x +=
-    //   Math.abs(mouseX) <= windowHalfX / 2
-    //     ? (mouseX / 2 - camera.position.x) * 0.005
-    //     : 0;
-    // camera.position.y += (-mouseY / 2 - camera.position.y) * 0.005;
-    // camera.lookAt(scene.position);
-    // controls.update();
-    // if ( flow ) {
-    //   flow.moveAlongCurve( 0.001 );
-    // }
     renderer.render(scene, camera);
     requestAnimationFrame(animate);
+  }
+
+  function downloadImg(imgSrc) {
+    return new Promise((resolve, reject) => {
+      const img = document.createElement('img');
+      img.crossOrigin = true;
+      img.onerror = (e) => reject(e);
+      img.onload = () => resolve(img);
+      img.src = imgSrc;
+    });
+  }
+
+  const initBackground = () => {
+    downloadImg(backgroundImg).then(img => {
+        console.log('img', img)
+        let texture = new Texture();
+        texture.image = img;
+        texture.needsUpdate = true;
+        scene.background = texture;
+    })
   }
 
     useEffect(() => {
@@ -362,6 +373,7 @@ const GlobeCanvas = () => {
         init();
         initGlobe();
         initTexts()
+        initBackground()
         onWindowResize();
         animate();
       }
