@@ -5,6 +5,7 @@ import GlobeCanvas from "./components/Globe"
 import "./styles.css"
 import websiteImg from "../../assets/images/Soba0001.png"
 import Model3D from "./components/3DModel/3DModel"
+import ImageCarousel from "./components/Carousel/Carousel"
 const Fix = () => {
     const introVideoRef = useRef()
     const [isVideoEnd, setIsVideoEnd] = useState(false)
@@ -65,6 +66,9 @@ const Fix = () => {
         </section>
         <section id="section3DModels">
             <Model3D />
+        </section>
+        <section>
+            <ImageCarousel />
         </section>
         {/* <section id="sectionBookACall">
             <div style={{color: 'black'}}>
