@@ -1,6 +1,6 @@
 import { useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Color, DirectionalLight, PointLight, Texture, Vector3 } from "three";
+import { Box3, Color, DirectionalLight, PointLight, Texture, Vector3 } from "three";
 import { useSpring, animated } from '@react-spring/three'
 import travelHistory from "../files/my-flights.json";
 import airportHistory from "../files/my-airports.json";
@@ -86,8 +86,8 @@ const ModelViewer = (props) => {
         // cameraRef.current.enableDamping = true;
         // cameraRef.current.dynamicDampingFactor = 0.01;
         // cameraRef.current.enablePan = false;
-        cameraRef.current.minDistance = 120;
-        cameraRef.current.maxDistance = 450;
+        cameraRef.current.minDistance = 180;
+        cameraRef.current.maxDistance = 400;
         cameraRef.current.polarRotateSpeed = 0.8;
         // cameraRef.current.zoomSpeed = 1;
         // cameraRef.current.autoRotate = false;
@@ -134,26 +134,26 @@ const ModelViewer = (props) => {
               // return e.status ? 0.5 : 0.3;
               return 2
             })
-            .arcDashLength(0.9)
-            .arcDashGap(4)
+            .arcDashLength(1)
+            .arcDashGap(10)
             .arcDashAnimateTime(1000)
             .arcsTransitionDuration(1000)
             .arcDashInitialGap((e) => e.order * 1)
-            .labelsData(airportHistory.airports)
-            .labelColor(() => "#ffcb21")
-            .labelDotOrientation((e) => {
-              return e.text === "ALA" ? "top" : "right";
-            })
-            .labelDotRadius(0.3)
-            .labelSize((e) => e.size)
-            .labelText("city")
-            .labelResolution(6)
-            .labelAltitude(0.01)
-            .pointsData(airportHistory.airports)
-            .pointColor(() => "#ffffff")
-            .pointsMerge(true)
-            .pointAltitude(0.07)
-            .pointRadius(0.05);
+            // .labelsData(airportHistory.airports)
+            // .labelColor(() => "#ffcb21")
+            // .labelDotOrientation((e) => {
+            //   return e.text === "ALA" ? "top" : "right";
+            // })
+            // .labelDotRadius(0.3)
+            // .labelSize((e) => e.size)
+            // .labelText("city")
+            // .labelResolution(6)
+            // .labelAltitude(0.01)
+            // .pointsData(airportHistory.airports)
+            // .pointColor(() => "#ffffff")
+            // .pointsMerge(true)
+            // .pointAltitude(0.07)
+            // .pointRadius(0.05);
         }, 1000);
     
         Globe.rotateY(-Math.PI * (5 / 9));
@@ -314,7 +314,7 @@ const ModelViewer = (props) => {
     return <>
         <CameraControls ref={cameraRef}/>
         <fog color={new Color('#535ef3')} near={200} far={2000}/>
-        <Background />
+        {/* <Background /> */}
         <perspectiveCamera
             ref={perCameraRef}
             aspect={window.innerWidth / window.innerHeight}

@@ -25,7 +25,7 @@ const ImageCarousel = () => {
     return (
       <>
         {new Array(60).fill('').map((el, idx) => (
-            <img key={`img-${idx}`} style={{display: imageIndex === idx + 1 ? 'block' : 'none'}} src={`/images/carousel room/Soba00${pad(idx + 1)}.png`} alt='' className="image-full-contain"/>
+            <img key={`img-${idx}`} style={{display: imageIndex === idx + 1 ? 'block' : 'none', background: 'transparent'}} src={`/images/carousel room/Soba00${pad(idx + 1)}.png`} alt='' className="image-full-contain"/>
         ))}
       </>
     );

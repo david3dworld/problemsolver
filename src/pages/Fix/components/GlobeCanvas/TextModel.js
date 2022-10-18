@@ -40,7 +40,7 @@ const TextModel = (props) => {
         geometry1.rotateY( Math.PI );
     
         const material = new THREE.MeshStandardMaterial( {
-          color: 0x00ff00
+          color: 0xC177FF
         } );
     
         const objectToCurve = new THREE.Mesh( geometry1, material );

@@ -10,6 +10,9 @@ const GlobeModel = (props) => {
                 antialias: true,
                 alpha: true,
             }}
+            style={{
+                width: '80vw'
+            }}
         >
             <ModelViewer videoEnded={videoEnded}/>
         </Canvas>
