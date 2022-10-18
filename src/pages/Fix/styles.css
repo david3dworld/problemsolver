@@ -12,7 +12,7 @@
     right: 0;
     top: 0;
     z-index: 2;
-    width: 30vw;
+    width: 40vw;
     height: auto;
 }
 .video-full{
@@ -64,6 +64,22 @@ canvas {
     font-weight: 600;
     transform: rotate(-90deg);
     left: -60px;
+    bottom: 50%;
+    color: rgb(231, 231, 62);
+}
+.btn-move-to-room{
+    position: absolute;
+    width: fit-content;
+    height: 50px;
+    background-color: transparent;
+    border-radius: 8px;
+    padding: 10px;
+    z-index: 5;
+    text-transform: uppercase;
+    font-size: 18px;
+    font-weight: 600;
+    transform: rotate(90deg);
+    right: -30px;
     bottom: 50%;
     color: rgb(231, 231, 62);
 }
@@ -181,7 +197,24 @@ canvas {
 .btn-book-a-call:hover{
     animation: buttonRotate 1.3s linear;
 }
-
+.button-room-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: absolute;
+    bottom: 30px;
+    width: calc(100% - 80px);
+    left: 40px;
+}
+.button-room-container button{
+    text-transform: uppercase;
+    color: rgb(13, 4, 56);
+    background-color: #CCB400;
+    border-radius: 10px;
+    padding: 15px;
+    font-size: 25px;
+    font-weight: 900;
+}
 @keyframes buttonRotate{
     0%{
         transform: rotate3d(1, 1, 1, 0);

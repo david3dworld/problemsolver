@@ -1,7 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
 
-const ImageCarousel = () => {
+const ImageCarousel = forwardRef((props, ref) => {
     const [imageIndex, setImageIndex] = useState(1)
+
+    useImperativeHandle(ref, () => ({
+        onClickLeft: () => {
+            if(imageIndex > 1){
+                setImageIndex(imageIndex - 1)
+            }
+        },
+        onClickRight: () => {
+            if(imageIndex < 60){
+                setImageIndex(imageIndex + 1)
+            }
+        },
+      }), [imageIndex])
 
     useEffect(() => {
         document.addEventListener('keyup', onKeyUp)
@@ -29,5 +42,5 @@ const ImageCarousel = () => {
         ))}
       </>
     );
-}
+})
 export default ImageCarousel

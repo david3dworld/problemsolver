@@ -83,14 +83,9 @@ const ModelViewer = (props) => {
 
     const setUpCameraControl = () => {
         cameraRef.current.setPosition(0,0,220)
-        // cameraRef.current.enableDamping = true;
-        // cameraRef.current.dynamicDampingFactor = 0.01;
-        // cameraRef.current.enablePan = false;
         cameraRef.current.minDistance = 180;
         cameraRef.current.maxDistance = 400;
         cameraRef.current.polarRotateSpeed = 0.8;
-        // cameraRef.current.zoomSpeed = 1;
-        // cameraRef.current.autoRotate = false;
 
         cameraRef.current.minPolarAngle = Math.PI / 3.5;
         cameraRef.current.maxPolarAngle = Math.PI - Math.PI / 3;
@@ -314,7 +309,6 @@ const ModelViewer = (props) => {
     return <>
         <CameraControls ref={cameraRef}/>
         <fog color={new Color('#535ef3')} near={200} far={2000}/>
-        {/* <Background /> */}
         <perspectiveCamera
             ref={perCameraRef}
             aspect={window.innerWidth / window.innerHeight}

@@ -10,6 +10,7 @@ const Fix = () => {
     const introVideoRef = useRef()
     const video3DWebsiteRef = useRef()
     const video3DRef = useRef()
+    const imagesRef = useRef()
     const [isVideoEnd, setIsVideoEnd] = useState(false)
     const [visible, setVisible] = useState(false)
     const [show3DVideoDescription, setShow3DVideoDescription] = useState(false)
@@ -130,6 +131,15 @@ const Fix = () => {
         lineHeight: 'inherit'
     }
 
+    const scrollToRoom = () => {
+        let element = document.getElementById("sectionImages")
+        if(element){
+          element.scrollIntoView({
+            behavior: 'smooth'
+          });
+        }
+    }
+
     return (
     <>
         {visible && <button className="scroll-to-top-button" onClick={() => {scrollToTop()}}>
@@ -144,7 +154,7 @@ const Fix = () => {
                 <source src="/video/Intro.mp4" type="video/mp4" />
             </video>
             <GlobeModel videoEnded={isVideoEnd}/>
-            <img src="/images/output-onlinegiftools.gif" alt='' id="tenWordsVideo"/>
+            <img src="/images/output-onlinegiftools (3).gif" alt='' id="tenWordsVideo"/>
         </section>
         <section id="section3DWebsite" style={{position: 'relative'}}>
             <video muted className="video-full" loop ref={video3DWebsiteRef} onTimeUpdate={(e) => {onVideo3DPlay(e)}}>
@@ -182,6 +192,9 @@ const Fix = () => {
             backgroundSize: '100% 100%',
             position: 'relative'
         }}>
+            <button className="btn-move-to-room" onClick={() => {scrollToRoom()}}>
+                {'Move to room >'}
+            </button>
             <Model3D modelRotate={modelRotate}/>
             <div className={showTextAnimate3DModel ? "title section-text-wrapper-absolute-animate section-text-animation" : "title section-text-wrapper-absolute-animate"} style={{
                 position: 'absolute',
@@ -233,8 +246,16 @@ const Fix = () => {
                         Minimize the number of errors and revisions needed in the design</span>
                     </div>
                 </div>
-                <div className="w-60">
-                    <ImageCarousel />
+                <div className="w-60 relative">
+                    <ImageCarousel ref={imagesRef}/>
+                    <div className="button-room-container">
+                        <button onClick={() => {imagesRef.current.onClickLeft()}}>
+                            Left
+                        </button>
+                        <button onClick={() => {imagesRef.current.onClickRight()}}>
+                            Right
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
