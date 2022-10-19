@@ -145,16 +145,16 @@ const Fix = () => {
         {visible && <button className="scroll-to-top-button" onClick={() => {scrollToTop()}}>
             {'Back to top >'}
         </button>}
-        <section className="sectionGlobe" style={{
+        <section id="sectionGlobe" style={{
             background: `url('images/CanvasBackground.png')`,
             backgroundSize: '100% 100%',
             position: 'relative'
         }}>
-            <video ref={introVideoRef} autoPlay muted id="introVideo" onEnded={() => {onVideoIntroEnd()}}>
+            {/* <video ref={introVideoRef} autoPlay muted id="introVideo" onEnded={() => {onVideoIntroEnd()}}>
                 <source src="/video/Intro.mp4" type="video/mp4" />
-            </video>
+            </video> */}
             <GlobeModel videoEnded={isVideoEnd}/>
-            <img src="/images/output-onlinegiftools (3).gif" alt='' id="tenWordsVideo"/>
+            <img src="/images/output-onlinegiftools.gif" alt='' id="tenWordsVideo"/>
         </section>
         <section id="section3DWebsite" style={{position: 'relative'}}>
             <video muted className="video-full" loop ref={video3DWebsiteRef} onTimeUpdate={(e) => {onVideo3DPlay(e)}}>

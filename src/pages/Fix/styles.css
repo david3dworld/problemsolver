@@ -12,8 +12,9 @@
     right: 0;
     top: 0;
     z-index: 2;
-    width: 40vw;
+    width: 45vw;
     height: auto;
+    transform: translateY(-30%);
 }
 .video-full{
     width: 100vw;

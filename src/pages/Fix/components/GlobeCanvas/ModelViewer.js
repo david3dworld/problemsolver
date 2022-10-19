@@ -1,6 +1,6 @@
-import { useThree } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Box3, Color, DirectionalLight, PointLight, Texture, Vector3 } from "three";
+import { Box3, Color, DirectionalLight, LoadingManager, PointLight, Texture, Vector3 } from "three";
 import { useSpring, animated } from '@react-spring/three'
 import travelHistory from "../files/my-flights.json";
 import airportHistory from "../files/my-airports.json";
@@ -8,9 +8,10 @@ import ThreeGlobe from "three-globe";
 import CameraControls from "../CameraControls/cameraControls"
 import backgroundImg from "../../../../assets/images/CanvasBackground.png"
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
+import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 // import { Flow } from 'three/addons/modifiers/CurveModifier.js';
 // import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
-// import * as THREE from 'three'
+import * as THREE from 'three'
 import TextModel from "./TextModel";
 
 const Background = () => {
@@ -40,7 +41,7 @@ const Background = () => {
 
 const ModelViewer = (props) => {
     const {videoEnded} = props
-    const { gl , scene} = useThree();
+    const { gl , scene, camera} = useThree();
     const globeRef = useRef();
     const cameraRef = useRef();
     const perCameraRef = useRef();
@@ -53,7 +54,7 @@ const ModelViewer = (props) => {
 
     useLayoutEffect(() => {
         if(gl){
-            gl.setSize(window.innerWidth, window.innerHeight);
+            gl.setSize(window.innerWidth * 0.8, window.innerHeight);
             gl.setPixelRatio(window.devicePixelRatio);
         }
     }, [gl])
@@ -78,17 +79,53 @@ const ModelViewer = (props) => {
         setUpCameraControl()
         initGlobe()
         // setListTextCover([])
+        initGlobeObj()
         initTexts()
     }, [])
 
     const setUpCameraControl = () => {
-        cameraRef.current.setPosition(0,0,220)
+        cameraRef.current.setPosition(0,100,220)
         cameraRef.current.minDistance = 180;
         cameraRef.current.maxDistance = 400;
         cameraRef.current.polarRotateSpeed = 0.8;
 
         cameraRef.current.minPolarAngle = Math.PI / 3.5;
         cameraRef.current.maxPolarAngle = Math.PI - Math.PI / 3;
+    }
+
+    const initGlobeObj = () => {
+      loadModel('/model/Planet.obj').then(obj => {
+        const mat = new THREE.MeshBasicMaterial({
+          color: 0xC177FF,
+          toneMapped: false,
+          emissiveIntensity: 2
+        })
+        obj.children.forEach(el => {
+          if(el.name !== "Box001"){
+            el.material = mat
+          } else {
+            el.material.transparent = true;
+            el.material.opacity = 0
+          }
+        })
+        obj.scale.set(3.2, 3.2, 3.2)
+        obj.rotation.set( 0, - Math.PI / 1.8, 0)
+        globeRef.current.add(obj)
+      })
+    }
+
+    const loadModel = url => {
+      return new Promise(resolve => {
+        const manager = new LoadingManager()
+        const loader = new OBJLoader(manager)
+        loader.load(
+          url,
+          function (data) {
+            resolve(data)
+          },
+          e => {},
+        )
+      })
     }
 
     function initGlobe() {
@@ -152,12 +189,12 @@ const ModelViewer = (props) => {
         }, 1000);
     
         Globe.rotateY(-Math.PI * (5 / 9));
-        Globe.rotateZ(-Math.PI / 6);
+        // Globe.rotateZ(-Math.PI / 6);
         const globeMaterial = Globe.globeMaterial();
         globeMaterial.color = new Color(0x3a228a);
         globeMaterial.emissive = new Color(0x220038);
         globeMaterial.emissiveIntensity = 0.1;
-        globeMaterial.shininess = 0.7;
+        globeMaterial.shininess = 0;
     
         // NOTE Cool stuff
         // globeMaterial.wireframe = true;
@@ -230,8 +267,8 @@ const ModelViewer = (props) => {
               fontSize: 15,
               moveCurve: 0.75,
               textCoverInfo: {
-                position: new Vector3(-50, 18, -85),
-                rotation: new Vector3(0, Math.PI / 6, 0)
+                position: new Vector3(-30, -20, -95),
+                rotation: new Vector3(0, Math.PI / 24, 0)
               },
               sectionId: 'section3DModels'
             },
@@ -242,8 +279,8 @@ const ModelViewer = (props) => {
               fontSize: 15,
               moveCurve: 0.8,
               textCoverInfo: {
-                position: new Vector3(-10, 58, -83),
-                rotation: new Vector3(0, Math.PI / 20, 0)
+                position: new Vector3( 0, 46, -88),
+                rotation: new Vector3(0, Math.PI / 48, 0)
               },
               sectionId: 'sectionBookACall'
             },
@@ -254,8 +291,8 @@ const ModelViewer = (props) => {
               fontSize: 15,
               moveCurve: 0.4,
               textCoverInfo: {
-                position: new Vector3(-40, 23, 90),
-                rotation: new Vector3(0, - Math.PI / 8, 0)
+                position: new Vector3(-20, 45, 100),
+                rotation: new Vector3(0, - Math.PI / 18, 0)
               },
               sectionId: 'section3DWebsite'
             },
@@ -266,7 +303,7 @@ const ModelViewer = (props) => {
               fontSize: 15,
               moveCurve: 0.55,
               textCoverInfo: {
-                position: new Vector3(-110, 8, 20),
+                position: new Vector3(-96, 32, 10),
                 rotation: new Vector3(0, Math.PI / 2 + Math.PI / 20, 0)
               },
               sectionId: 'section3DVideo'

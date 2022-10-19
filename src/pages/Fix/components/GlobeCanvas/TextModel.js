@@ -51,7 +51,7 @@ const TextModel = (props) => {
         flow.object3D.userData = {text: '3D models', isText: true}
     
         const obj = flow.object3D
-        setObject(obj)
+        // setObject(obj)
     
         if(textCoverInfo){
             const box = cpBox(obj)
